@@ -1,10 +1,11 @@
 const router = require('express').Router()
 const bcrypt = require('bcrypt')
 const User = require('../models/User')
+const isSignedIn = require('../middleware/is-signed-in')
 
 // SIGN UP FORM
 router.get('/sign-up', (req, res) => {
-  res.render('/auth/sign-up.ejs')
+  res.render('auth/sign-up.ejs')
 })
 
 // CREATE USER
@@ -20,7 +21,7 @@ router.post('/sign-up', async (req, res) => {
       return res.send('Password must match confirm password')
     }
 
-    const hashedPassword = bcrypt.hashSync(req.body.username, 10)
+    const hashedPassword = bcrypt.hashSync(req.body.password, 10)
 
     await User.create({
       username: req.body.username,
@@ -49,8 +50,8 @@ router.post('/sign-in', async (req, res) => {
     }
 
     const validPassword = bcrypt.compareSync(
-      userInDatabase.password,
       req.body.password,
+      userInDatabase.password
     )
 
     if (!validPassword) {
@@ -62,7 +63,7 @@ router.post('/sign-in', async (req, res) => {
       _id: userInDatabase._id,
     }
 
-    res.redirect('/auth/sign-in.ejs')
+    res.redirect('/royal-vault')
   } catch (error) {
     console.log(error)
     res.send('The Gatekeeper could not verify your identity.')
